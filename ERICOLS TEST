@@ -1,0 +1,308 @@
+library(shiny)
+library(shinydashboard)
+library(readxl)
+library(dplyr)
+library(DT)
+library(digest)
+library(blastula)
+library(ggplot2)
+
+# --- USERS DATA --- stockage simple en mémoire (à remplacer par DB en prod)
+users_data <- reactiveVal(
+  tibble(
+    user = "admin",
+    password = digest("adminpass", algo = "sha256"),
+    nom = "Admin",
+    prenom = "Super",
+    telephone = NA_character_,
+    email = "admin@example.com",
+    admin = TRUE
+  )
+)
+
+# --- FONCTION ENVOI MAIL (à configurer)
+send_email <- function(to, user, pwd, link) {
+  email <- compose_email(
+    body = md(glue::glue("
+Bonjour {user},
+
+Votre compte sur l'application ERICOLS a été créé.
+
+Login : {user}
+Mot de passe : {pwd}
+
+Accédez à l'application ici : {link}
+
+Cordialement,
+L'équipe ERICOLS
+"))
+  )
+  smtp_send(
+    email,
+    to = to,
+    from = "no-reply@yourdomain.com",
+    subject = "Création de votre compte ERICOLS",
+    credentials = creds(
+      host = "smtp.yourserver.com",
+      port = 587,
+      user = "smtp_user",
+      pass = "smtp_password",
+      use_ssl = TRUE
+    )
+  )
+}
+
+# --- UI ---
+ui <- dashboardPage(
+  skin = "black",
+  dashboardHeader(title = "ERICOLS", titleWidth = 300),
+  dashboardSidebar(
+    width = 300,
+    sidebarMenu(
+      id = "tabs",
+      menuItem("Chargement", tabName = "load", icon = icon("file-upload")),
+      menuItem("Visualisation", tabName = "viz", icon = icon("chart-line")),
+      menuItem("Utilisateurs", tabName = "users", icon = icon("users-cog"))
+    )
+  ),
+  dashboardBody(
+    shinyjs::useShinyjs(),
+    tags$style(HTML("
+      /* Style simple blanc épuré inspiré DIN */
+      body, .content-wrapper {
+        background-color: #fff;
+        color: #222;
+        font-family: Arial, sans-serif;
+      }
+      .main-header .logo {
+        background-color: #003366 !important;
+        color: white !important;
+        font-weight: bold;
+        font-size: 22px;
+      }
+      .main-sidebar {
+        background-color: #f0f0f0;
+      }
+      .content-header h1 {
+        font-weight: normal;
+        margin-bottom: 15px;
+      }
+      .btn-primary {
+        background-color: #003366;
+        border-color: #003366;
+      }
+      .btn-primary:hover {
+        background-color: #0059b3;
+        border-color: #0059b3;
+      }
+      .form-control {
+        border-radius: 0;
+      }
+    ")),
+    
+    uiOutput("login_ui"),
+    
+    tabItems(
+      tabItem(tabName = "load",
+              h2("Charger un fichier Excel"),
+              fileInput("file", "Sélectionner un fichier Excel (.xlsx)", accept = ".xlsx"),
+              verbatimTextOutput("file_status")
+      ),
+      tabItem(tabName = "viz",
+              h2("Visualisation des données"),
+              uiOutput("filter_ui"),
+              plotOutput("plot"),
+              DTOutput("table")
+      ),
+      tabItem(tabName = "users",
+              h2("Gestion des utilisateurs (Admin uniquement)"),
+              conditionalPanel(
+                condition = "output.isAdmin == true",
+                textInput("new_user", "Login"),
+                passwordInput("new_password", "Mot de passe"),
+                textInput("new_nom", "Nom"),
+                textInput("new_prenom", "Prénom"),
+                textInput("new_tel", "Téléphone"),
+                textInput("new_email", "Email"),
+                actionButton("add_user", "Créer utilisateur"),
+                br(), br(),
+                DTOutput("users_table")
+              ),
+              conditionalPanel(
+                condition = "output.isAdmin == false",
+                p("Accès réservé à l'administrateur.")
+              )
+      )
+    )
+  )
+)
+
+# --- SERVER ---
+server <- function(input, output, session) {
+  # reactive valeur utilisateur connecté
+  user_logged <- reactiveVal(NULL)
+  
+  # Login UI (modal)
+  output$login_ui <- renderUI({
+    if (is.null(user_logged())) {
+      fluidRow(
+        column(4, offset = 4,
+               wellPanel(
+                 h3("Connexion"),
+                 textInput("login", "Login"),
+                 passwordInput("pwd", "Mot de passe"),
+                 actionButton("btn_login", "Se connecter")
+               )
+        )
+      )
+    } else {
+      NULL
+    }
+  })
+  
+  # Vérification login
+  observeEvent(input$btn_login, {
+    req(input$login, input$pwd)
+    users <- users_data()
+    pwd_hash <- digest(input$pwd, algo = "sha256")
+    user <- users %>% filter(user == input$login, password == pwd_hash)
+    if (nrow(user) == 1) {
+      user_logged(user)
+      showNotification(paste0("Bienvenue ", user$prenom), type = "message")
+    } else {
+      showNotification("Login ou mot de passe incorrect", type = "error")
+    }
+  })
+  
+  # Indicateur admin pour UI
+  output$isAdmin <- reactive({
+    req(user_logged())
+    user_logged()$admin
+  })
+  outputOptions(output, "isAdmin", suspendWhenHidden = FALSE)
+  
+  # Chargement Excel
+  data_loaded <- reactive({
+    req(user_logged())
+    req(input$file)
+    
+    sheets <- tryCatch(readxl::excel_sheets(input$file$datapath), error = function(e) NULL)
+    validate(need(!is.null(sheets), "Impossible de lire le fichier Excel"))
+    
+    dfs <- lapply(sheets, function(sh) {
+      df <- readxl::read_excel(input$file$datapath, sheet = sh) %>% janitor::clean_names()
+      # Convertir toutes colonnes en character (pour éviter mélange character/double)
+      df <- df %>% mutate(across(everything(), as.character))
+      df
+    })
+    
+    bind_rows(dfs)
+  })
+  
+  output$file_status <- renderText({
+    if (is.null(input$file)) return("")
+    paste("Fichier", input$file$name, "chargé avec succès.")
+  })
+  
+  # Filtrage UI dynamique selon données
+  output$filter_ui <- renderUI({
+    df <- data_loaded()
+    req(df)
+    fluidRow(
+      column(3, selectInput("filter_siren", "SIREN", choices = c("", unique(df$siren_entite)), selected = "", multiple = TRUE)),
+      column(3, selectInput("filter_famille", "Libellé Famille", choices = c("", unique(df$libelle_famille)), selected = "", multiple = TRUE)),
+      column(3, selectInput("filter_annee", "Année", choices = c("", unique(df$exercice)), selected = "", multiple = TRUE))
+    )
+  })
+  
+  data_filtered <- reactive({
+    df <- data_loaded()
+    req(df)
+    
+    if (!is.null(input$filter_siren) && length(input$filter_siren) > 0 && !all(input$filter_siren == "")) {
+      df <- df %>% filter(siren_entite %in% input$filter_siren)
+    }
+    if (!is.null(input$filter_famille) && length(input$filter_famille) > 0 && !all(input$filter_famille == "")) {
+      df <- df %>% filter(libelle_famille %in% input$filter_famille)
+    }
+    if (!is.null(input$filter_annee) && length(input$filter_annee) > 0 && !all(input$filter_annee == "")) {
+      df <- df %>% filter(exercice %in% input$filter_annee)
+    }
+    
+    df
+  })
+  
+  output$plot <- renderPlot({
+    df <- data_filtered()
+    req(df)
+    if (!"exercice" %in% names(df)) return(NULL)
+    if (!"siren_entite" %in% names(df)) return(NULL)
+    # Exemple simple : nombre par année
+    ggplot(df, aes(x = exercice)) + 
+      geom_bar(fill = "#003366") + 
+      theme_minimal() +
+      labs(title = "Nombre d'entrées par année", x = "Année", y = "Nombre")
+  })
+  
+  output$table <- renderDT({
+    df <- data_filtered()
+    req(df)
+    datatable(df)
+  })
+  
+  # Liste utilisateurs pour admin
+  output$users_table <- renderDT({
+    req(user_logged())
+    validate(need(user_logged()$admin, "Accès réservé à l'administrateur"))
+    datatable(users_data() %>% select(-password))
+  })
+  
+  # Ajout utilisateur
+  observeEvent(input$add_user, {
+    req(user_logged())
+    validate(need(user_logged()$admin, "Accès réservé à l'administrateur"))
+    
+    if (input$new_user == "" || input$new_password == "" || input$new_email == "") {
+      showNotification("Login, mot de passe et email sont obligatoires.", type = "error")
+      return()
+    }
+    
+    all_users <- users_data()
+    if (input$new_user %in% all_users$user) {
+      showNotification("Ce login existe déjà.", type = "error")
+      return()
+    }
+    
+    new_user <- tibble(
+      user = input$new_user,
+      password = digest(input$new_password, algo = "sha256"),
+      nom = input$new_nom,
+      prenom = input$new_prenom,
+      telephone = input$new_tel,
+      email = input$new_email,
+      admin = FALSE
+    )
+    
+    users_data(bind_rows(all_users, new_user))
+    
+    # Envoi mail
+    tryCatch({
+      app_link <- paste0(session$clientData$url_protocol, "//", session$clientData$url_hostname)
+      send_email(new_user$email, new_user$user, input$new_password, app_link)
+      showNotification("Utilisateur créé et mail envoyé.", type = "message")
+    }, error = function(e) {
+      showNotification(paste("Erreur envoi mail:", e$message), type = "error")
+    })
+    
+    # Reset champs
+    updateTextInput(session, "new_user", "")
+    updatePasswordInput(session, "new_password", "")
+    updateTextInput(session, "new_nom", "")
+    updateTextInput(session, "new_prenom", "")
+    updateTextInput(session, "new_tel", "")
+    updateTextInput(session, "new_email", "")
+  })
+}
+
+# Run app
+shinyApp(ui, server)
