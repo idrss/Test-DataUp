@@ -1,0 +1,121 @@
+---
+title: R Markdown
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Changelog
+
+## v1.3.6 : stabilisation des corrections des valeurs avec % et des résultats dynamiques
+
+## v1.3.5 : corrections des valeurs avec % et des résultats dynamiques
+
+-   corrections :
+
+    -   table principale multiplie automatiquement par 100 lorsque % est dans le nom de l'indicateur
+    -   écran territoire, affichage amélioré des pourcentages et des décimales
+    -   optimisation des fonctions internes pour les pourcentages et les décimales 
+
+## v1.3.4 : version avec la nouvelle année 2022 
+
+-   ajouts :
+
+    -   année 2022
+
+-   corrections :
+
+    -   référentiel géographique des organismes
+    -   tri des indicateurs 
+
+-   modifications :
+
+    -   fonction import data avec "na" changé "0" 
+    -   nb de décimale pour ajout d'un indicateur écran territoire
+    -   mise à jour R version : 4.4.0
+    -   suppression de l'indicateur nb de 
+    -   indicateurs clefs pour la page bailleur 
+
+-   suppressions :
+
+    -   année 2017 
+
+## v1.2.6 : version avec la nouvelle année 2021
+
+-   ajouts :
+
+    -   année 2021
+
+-   corrections :
+
+    -   bug sur l'indicateur : BLFGERE, les logements foyers
+
+-   modifications :
+
+    -   libellé court des indicateurs
+    -   ui écran territoire
+
+## v1.1.1 : version initiale stabilisée et améliorée
+
+-   corrections :
+
+    -   notamment sur les chiffres
+
+    -   les fonctions
+
+    -   les indicateurs
+
+    -   les affichages
+
+    -   les textes
+
+    -   les pages
+
+-   modifications :
+
+    -   design des pages
+
+    -   logo
+
+-   ajouts :
+
+    -   plusieurs liens
+
+    -   année 2020
+
+-   développement :
+
+    -   docker maintenu
+
+    -   git gitlab (branch dev & main pour la production)
+
+    -   packrat supprimé
+
+    -   remplacé par renv
+
+## v1.0.1 - v1.0.14 : version initiale
+
+-   corrections :
+
+    -   notamment sur les chiffres
+
+    -   les fonctions
+
+    -   les indicateurs
+
+    -   les affichages
+
+    -   le design global
+
+-   ajouts :
+
+    -   page ratios
+
+-   développement :
+
+    -   docker
+
+    -   git redmine
+
+    -   packrat

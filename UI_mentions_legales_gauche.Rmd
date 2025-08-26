@@ -1,0 +1,75 @@
+---
+title: R Markdown
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Note de présentation
+
+[La note wiki (accessible via RIE
+uniquement).](http://wikisi.e2.rie.gouv.fr/wikisi/application/202/)
+
+# Usage
+
+Les utilisateurs sont responsables des interrogations qu'ils formulent
+ainsi que de l'interprétation et de l'utilisation qu'ils font des
+résultats.
+
+Il leur appartient d'en faire un usage conforme aux réglementations en
+vigueur et aux recommandations de la CNIL lorsque des données ont un
+caractère nominatif (loi n 78.17 du 6 janvier 1978, relative à
+l'informatique, aux fichiers et aux libertés dite loi informatique et
+libertés).
+
+Il appartient à l'utilisateur de ce site de prendre toutes les mesures
+appropriées de façon à protéger ses propres données et/ou logiciels de
+la contamination par d'éventuels virus circulant sur le réseau Internet.
+
+De manière générale, le MTECT et le MCVL décline toute responsabilité à
+un éventuel dommage survenu pendant la consultation du présent site.
+
+Les messages que vous pouvez nous adresser transitant par un réseau
+ouvert de télécommunications, nous ne pouvons assurer leur
+confidentialité.
+
+# Service gestionnaire
+
+-   Ministère de la transition écologique et de la cohésion des
+    territoires (MTECT)
+
+-   Ministère chargé de la ville et du logement (MCVL)
+
+-   Direction Générale de l'Aménagement, du Logement et de la Nature
+    (DGALN)
+
+-   Direction de l'habitat, de l'urbanisme et des paysages (DHUP)
+
+-   Sous-direction de la législation de l'habitat et des organismes de
+    logement social (LO)
+
+-   Bureau de l'observation et du suivi des organismes HLM (LO4)
+
+# Hébergement
+
+-   Ministère de la transition écologique et de la cohésion des
+    territoires (MTECT)
+
+-   Ministère chargé de la ville et du logement (MCVL)
+
+-   Commissariat général au Développement durable (CGDD)
+
+-   Sous-direction de la stratégie éditoriale et de la diffusion (SDSES)
+
+-   Bureau des usages numériques (BUN)
+
+# Contact
+
+### LO4
+
+[lo4.lo.dhup.dgaln\@developpement-durable.gouv.fr](mailto:lo4.lo.dhup.dgaln@developpement-durable.gouv.fr)
+
+### BUN
+
+[bun.sdsed.cgdd\@developpement-durable.gouv.fr](mailto:bun.sdsed.cgdd@developpement-durable.gouv.fr)

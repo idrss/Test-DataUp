@@ -1,0 +1,54 @@
+---
+title: R Markdown
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Présentation
+
+Application web pour rendre accessible les informations financières des
+organismes de logement social (OLS). Elle est réalisée par la
+DGALN/DHUP/LO4 à destination des services déconcentrés.
+
+# Source des données
+
+Les OLS déclarent leurs états financiers dans HARMONIA puis l'ensemble
+de ces valeurs sont déversées dans le **DIAGFIN**. **ERICOLS** s'incrit
+en bout de chaîne. L'écosystème de l'information financière des
+organismes de logement social est constitué de trois objets numériques :
+**HARMONIA** base d'observation du logement : étude et référencement des
+organismes pour le recueil, **DIAGFIN** pour le traitement et **ERICOLS**
+pour la mise à disposition.
+
+# Application web
+
+Pour une expérience optimale, l'application est à utiliser avec un
+navigateur à jour. Voici quelques fonctions utiles pour mieux naviguer à
+travers l'application web :
+
+-   rechercher :
+
+    -   menus déroulants : sont également une barre de recherche (avec
+        fonction d'autocomplétion). Il suffit de cliquer dessus et Suppr
+        le texte pour rechercher le terme souhaité ;
+
+    -   page `Ctrl` + `F` : un mot ou un groupe de lettres peuvent être
+        recherchés dans les page ;
+
+-   sauvegarder `Ctrl` + `S` : l'ensemble des pages (des 4 onglets)
+    peuvent être sauvegardées en `.html` ;
+
+-   imprimer `Ctrl` + `P` : l'ensemble des 4 pages (des 4 onglets)
+    peuvent être imprimées ;
+
+-   doubler `Ctrl` + `N` : l'application peut être ouverte dans
+    plusieurs fenêtres afin de faciliter les comparaisons ;
+
+-   zoomer `Ctrl` + `molette` ou `+` ou `-` : pour ajuster la résolution
+    de son écran à celle de l'application.
+
+# Règles d'utilisation
+
+`Diffusion limitée, usage strictement reservé MTES & MCTRCT, document de travail, données sensibles, tous droits réservés, 2019-2024 L'interprétation des valeurs présentées est de la responsabilité de l'utilisateur. L'application n'a aucune vocation de se substituer à une analyse financière.`

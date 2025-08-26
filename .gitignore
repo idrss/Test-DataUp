@@ -1,0 +1,9 @@
+.Rproj.user
+packrat
+*.log 
+.Rhistory
+.gitignore
+.Rprofile
+renv
+renv.lock
+rsconnect
