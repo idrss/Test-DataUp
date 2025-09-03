@@ -1,4 +1,5 @@
 Rédigée par Idrissa NDIAYE
 
 
-Adresse professionnelle : idrissa.ndiaye@developpement-durable.gouv.fr
+Adresse professionnelle : Idrissa.NDIAYE@ext.uca.fr
+
